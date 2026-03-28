@@ -1,738 +1,211 @@
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <!DOCTYPE html>
 <html lang="nl">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>AWC Warehouse App</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AWC App</title>
 
-  <meta name="theme-color" content="#111111">
-  <link rel="manifest" href="manifest.json">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-
-  <style>
-    * { box-sizing: border-box; }
-    body {
-      margin: 0;
-      font-family: Arial, sans-serif;
-      background: #f4f6f8;
-      color: #111;
-    }
-
-    header {
-      background: #111;
-      color: #fff;
-      padding: 16px;
-      text-align: center;
-      position: sticky;
-      top: 0;
-      z-index: 10;
-    }
-
-    header h1 {
-      margin: 0 0 10px 0;
-      font-size: 22px;
-    }
-
-    .lang-switch {
-      display: inline-flex;
-      gap: 8px;
-    }
-
-    .lang-switch button,
-    nav button,
-    .btn {
-      border: none;
-      border-radius: 10px;
-      padding: 12px 14px;
-      font-size: 15px;
-      cursor: pointer;
-    }
-
-    .lang-switch button {
-      background: #2c2c2c;
-      color: #fff;
-    }
-
-    .lang-switch button.active {
-      background: #ff7a00;
-      color: #fff;
-    }
-
-    nav {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 6px;
-      padding: 10px;
-      background: #1e1e1e;
-      position: sticky;
-      top: 76px;
-      z-index: 9;
-    }
-
-    nav button {
-      background: #2a2a2a;
-      color: #fff;
-      width: 100%;
-    }
-
-    nav button.active {
-      background: #ff7a00;
-    }
-
-    main {
-      padding: 14px;
-      max-width: 900px;
-      margin: 0 auto;
-    }
-
-    .tab {
-      display: none;
-    }
-
-    .tab.active {
-      display: block;
-    }
-
-    .card {
-      background: #fff;
-      border-radius: 14px;
-      padding: 16px;
-      margin-bottom: 14px;
-      box-shadow: 0 3px 10px rgba(0,0,0,0.08);
-    }
-
-    h2, h3 {
-      margin-top: 0;
-    }
-
-    label {
-      display: block;
-      margin-top: 12px;
-      margin-bottom: 6px;
-      font-weight: 700;
-    }
-
-    input, select, textarea {
-      width: 100%;
-      padding: 12px;
-      border: 1px solid #d7d7d7;
-      border-radius: 10px;
-      font-size: 15px;
-      background: #fff;
-    }
-
-    textarea {
-      min-height: 100px;
-      resize: vertical;
-    }
-
-    .actions {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
-      gap: 10px;
-      margin-top: 14px;
-    }
-
-    .btn {
-      background: #111;
-      color: #fff;
-      width: 100%;
-    }
-
-    .btn.secondary {
-      background: #ff7a00;
-    }
-
-    .stats {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 10px;
-    }
-
-    .stat-box {
-      background: #f8f8f8;
-      border-radius: 12px;
-      padding: 14px;
-      text-align: center;
-    }
-
-    .stat-box strong {
-      display: block;
-      font-size: 28px;
-      margin-top: 6px;
-    }
-
-    ul {
-      padding-left: 18px;
-      margin-bottom: 0;
-    }
-
-    li {
-      margin-bottom: 8px;
-      line-height: 1.4;
-    }
-
-    .small {
-      font-size: 13px;
-      color: #666;
-    }
-
-    .compare-box {
-      background: #fff7ef;
-      border: 1px solid #ffd1a6;
-      border-radius: 12px;
-      padding: 12px;
-      margin-top: 10px;
-    }
-
-    @media (max-width: 640px) {
-      nav {
-        grid-template-columns: repeat(2, 1fr);
-        top: 92px;
-      }
-      .stats {
-        grid-template-columns: 1fr;
-      }
-    }
-  </style>
+<style>
+body { font-family: Arial; margin:0; background:#f4f4f4;}
+header { background:#111; color:#fff; padding:15px; text-align:center;}
+nav { display:grid; grid-template-columns: repeat(4,1fr);}
+nav button { padding:12px; border:none; background:#222; color:#fff;}
+nav button.active { background:#ff7a00;}
+main { padding:15px;}
+.card { background:#fff; padding:15px; margin-bottom:15px; border-radius:10px;}
+input,select,textarea { width:100%; padding:10px; margin-top:5px;}
+button { margin-top:10px; padding:10px; width:100%;}
+</style>
 </head>
+
 <body>
-  <header>
-    <h1 id="appTitle">Lege Pallets AWC</h1>
-    <div class="lang-switch">
-      <button id="langNlBtn" class="active" onclick="setLang('nl')">NL</button>
-      <button id="langEnBtn" onclick="setLang('en')">EN</button>
-    </div>
-  </header>
-
-  <nav>
-    <button id="tabBtnDashboard" class="active" onclick="showTab('dashboard')">Dashboard</button>
-    <button id="tabBtnPallets" onclick="showTab('pallets')">Pallets</button>
-    <button id="tabBtnChecklist" onclick="showTab('checklist')">Checklist</button>
-    <button id="tabBtnIncident" onclick="showTab('incident')">Bijna ongeval</button>
-  </nav>
-
-  <main>
-    <section id="dashboard" class="tab active">
-      <div class="card">
-        <h2 id="dashboardTitle">Dashboard</h2>
-        <div class="stats">
-          <div class="stat-box">
-            <span id="statTotalLabel">Totaal pallets</span>
-            <strong id="statTotal">0</strong>
-          </div>
-          <div class="stat-box">
-            <span id="statLastLabel">Laatste telling</span>
-            <strong id="statLast">0</strong>
-          </div>
-        </div>
-      </div>
-
-      <div class="card">
-        <h3 id="compareTitle">Vergelijking laatste tellingen</h3>
-        <div id="compareOutput" class="compare-box">Nog geen vergelijking beschikbaar.</div>
-      </div>
-
-      <div class="card">
-        <h3 id="chartTitle">Trend</h3>
-        <canvas id="palletChart"></canvas>
-      </div>
-    </section>
-
-    <section id="pallets" class="tab">
-      <div class="card">
-        <h2 id="palletFormTitle">Pallet telling</h2>
-
-        <label id="labelLocation" for="locatie">Locatie</label>
-        <select id="locatie">
-          <option value="Conakryweg">Conakryweg</option>
-          <option value="Slego">Slego</option>
-        </select>
-
-        <label id="labelCount" for="aantal">Aantal lege pallets</label>
-        <input type="number" id="aantal" min="0" placeholder="Aantal">
-
-        <label id="labelName" for="palletNaam">Naam</label>
-        <input type="text" id="palletNaam" placeholder="Naam medewerker">
-
-        <div class="actions">
-          <button class="btn" id="savePalletBtn" onclick="savePallets()">Opslaan</button>
-          <button class="btn secondary" id="mailPalletBtn" onclick="mailPallets()">Mail</button>
-          <button class="btn" id="pdfPalletBtn" onclick="exportPalletPDF()">PDF</button>
-        </div>
-      </div>
-
-      <div class="card">
-        <h3 id="historyTitle">Vorige tellingen</h3>
-        <ul id="palletList"></ul>
-      </div>
-    </section>
-
-    <section id="checklist" class="tab">
-      <div class="card">
-        <h2 id="checklistTitle">Machine checklist</h2>
-
-        <label id="labelMachine" for="machineType">Machine</label>
-        <select id="machineType">
-          <option value="Reachtruck">Reachtruck</option>
-          <option value="Pompkar">Pompkar</option>
-        </select>
-
-        <label id="labelCheckLocation" for="checkLocatie">Locatie</label>
-        <select id="checkLocatie">
-          <option value="Conakryweg">Conakryweg</option>
-          <option value="Slego">Slego</option>
-        </select>
-
-        <label id="labelMachineName" for="checkNaam">Naam</label>
-        <input type="text" id="checkNaam" placeholder="Naam medewerker">
-
-        <label id="labelMachineNote" for="opmerking">Probleem / opmerking</label>
-        <textarea id="opmerking" placeholder="Beschrijf het probleem"></textarea>
-
-        <label id="labelPhoto" for="foto">Foto</label>
-        <input type="file" id="foto" accept="image/*">
-
-        <div class="actions">
-          <button class="btn secondary" id="mailChecklistBtn" onclick="mailChecklist()">Mail</button>
-          <button class="btn" id="pdfChecklistBtn" onclick="pdfChecklist()">PDF</button>
-        </div>
-        <p class="small" id="photoNote">Let op: foto gaat mee in PDF, niet rechtstreeks als mailbijlage vanuit de browser.</p>
-      </div>
-    </section>
-
-    <section id="incident" class="tab">
-      <div class="card">
-        <h2 id="incidentTitle">Bijna ongeval</h2>
-
-        <label id="labelIncidentLocation" for="incidentLocatie">Locatie</label>
-        <select id="incidentLocatie">
-          <option value="Conakryweg">Conakryweg</option>
-          <option value="Slego">Slego</option>
-        </select>
-
-        <label id="labelIncidentName" for="incidentNaam">Naam</label>
-        <input type="text" id="incidentNaam" placeholder="Naam medewerker">
-
-        <label id="labelIncidentText" for="incidentText">Beschrijving</label>
-        <textarea id="incidentText" placeholder="Beschrijf het bijna ongeval"></textarea>
-
-        <div class="actions">
-          <button class="btn secondary" id="mailIncidentBtn" onclick="mailIncident()">Mail</button>
-          <button class="btn" id="pdfIncidentBtn" onclick="pdfIncident()">PDF</button>
-        </div>
-      </div>
-    </section>
-  </main>
-
-  <script>
-    let currentLang = "nl";
-    let palletChart = null;
-    let palletData = JSON.parse(localStorage.getItem("awc_pallets")) || [];
-
-    const i18n = {
-      nl: {
-        appTitle: "Lege Pallets AWC",
-        tabDashboard: "Dashboard",
-        tabPallets: "Pallets",
-        tabChecklist: "Checklist",
-        tabIncident: "Bijna ongeval",
-        dashboardTitle: "Dashboard",
-        statTotalLabel: "Totaal pallets",
-        statLastLabel: "Laatste telling",
-        compareTitle: "Vergelijking laatste tellingen",
-        compareEmpty: "Nog geen vergelijking beschikbaar.",
-        chartTitle: "Trend",
-        palletFormTitle: "Pallet telling",
-        labelLocation: "Locatie",
-        labelCount: "Aantal lege pallets",
-        labelName: "Naam",
-        save: "Opslaan",
-        mail: "Mail",
-        pdf: "PDF",
-        historyTitle: "Vorige tellingen",
-        checklistTitle: "Machine checklist",
-        labelMachine: "Machine",
-        labelCheckLocation: "Locatie",
-        labelMachineName: "Naam",
-        labelMachineNote: "Probleem / opmerking",
-        labelPhoto: "Foto",
-        photoNote: "Let op: foto gaat mee in PDF, niet rechtstreeks als mailbijlage vanuit de browser.",
-        incidentTitle: "Bijna ongeval",
-        labelIncidentLocation: "Locatie",
-        labelIncidentName: "Naam",
-        labelIncidentText: "Beschrijving",
-        palletSaved: "Pallet telling opgeslagen.",
-        enterValidCount: "Vul een geldig aantal in.",
-        palletMailSubject: "AWC Pallet telling",
-        checklistMailSubject: "AWC Machine checklist",
-        incidentMailSubject: "AWC Bijna ongeval",
-        palletPdfTitle: "Pallet overzicht",
-        checklistPdfTitle: "Machine checklist",
-        incidentPdfTitle: "Bijna ongeval",
-        location: "Locatie",
-        count: "Aantal",
-        name: "Naam",
-        machine: "Machine",
-        note: "Opmerking",
-        description: "Beschrijving",
-        date: "Datum",
-        comparisonMore: "meer dan de vorige telling",
-        comparisonLess: "minder dan de vorige telling",
-        comparisonEqual: "gelijk aan de vorige telling"
-      },
-      en: {
-        appTitle: "Empty Pallets AWC",
-        tabDashboard: "Dashboard",
-        tabPallets: "Pallets",
-        tabChecklist: "Checklist",
-        tabIncident: "Near miss",
-        dashboardTitle: "Dashboard",
-        statTotalLabel: "Total pallets",
-        statLastLabel: "Last count",
-        compareTitle: "Comparison of latest counts",
-        compareEmpty: "No comparison available yet.",
-        chartTitle: "Trend",
-        palletFormTitle: "Pallet count",
-        labelLocation: "Location",
-        labelCount: "Number of empty pallets",
-        labelName: "Name",
-        save: "Save",
-        mail: "Mail",
-        pdf: "PDF",
-        historyTitle: "Previous counts",
-        checklistTitle: "Machine checklist",
-        labelMachine: "Machine",
-        labelCheckLocation: "Location",
-        labelMachineName: "Name",
-        labelMachineNote: "Problem / note",
-        labelPhoto: "Photo",
-        photoNote: "Note: the photo is included in the PDF, not directly as a mail attachment from the browser.",
-        incidentTitle: "Near miss",
-        labelIncidentLocation: "Location",
-        labelIncidentName: "Name",
-        labelIncidentText: "Description",
-        palletSaved: "Pallet count saved.",
-        enterValidCount: "Enter a valid number.",
-        palletMailSubject: "AWC Pallet count",
-        checklistMailSubject: "AWC Machine checklist",
-        incidentMailSubject: "AWC Near miss",
-        palletPdfTitle: "Pallet overview",
-        checklistPdfTitle: "Machine checklist",
-        incidentPdfTitle: "Near miss",
-        location: "Location",
-        count: "Count",
-        name: "Name",
-        machine: "Machine",
-        note: "Note",
-        description: "Description",
-        date: "Date",
-        comparisonMore: "more than the previous count",
-        comparisonLess: "less than the previous count",
-        comparisonEqual: "equal to the previous count"
-      }
-    };
-
-    function t(key) {
-      return i18n[currentLang][key];
-    }
-
-    function setLang(lang) {
-      currentLang = lang;
-      document.getElementById("langNlBtn").classList.toggle("active", lang === "nl");
-      document.getElementById("langEnBtn").classList.toggle("active", lang === "en");
-      applyTranslations();
-      renderAll();
-    }
-
-    function applyTranslations() {
-      document.getElementById("appTitle").textContent = t("appTitle");
-      document.getElementById("tabBtnDashboard").textContent = t("tabDashboard");
-      document.getElementById("tabBtnPallets").textContent = t("tabPallets");
-      document.getElementById("tabBtnChecklist").textContent = t("tabChecklist");
-      document.getElementById("tabBtnIncident").textContent = t("tabIncident");
-
-      document.getElementById("dashboardTitle").textContent = t("dashboardTitle");
-      document.getElementById("statTotalLabel").textContent = t("statTotalLabel");
-      document.getElementById("statLastLabel").textContent = t("statLastLabel");
-      document.getElementById("compareTitle").textContent = t("compareTitle");
-      document.getElementById("chartTitle").textContent = t("chartTitle");
-
-      document.getElementById("palletFormTitle").textContent = t("palletFormTitle");
-      document.getElementById("labelLocation").textContent = t("labelLocation");
-      document.getElementById("labelCount").textContent = t("labelCount");
-      document.getElementById("labelName").textContent = t("labelName");
-      document.getElementById("savePalletBtn").textContent = t("save");
-      document.getElementById("mailPalletBtn").textContent = t("mail");
-      document.getElementById("pdfPalletBtn").textContent = t("pdf");
-      document.getElementById("historyTitle").textContent = t("historyTitle");
-
-      document.getElementById("checklistTitle").textContent = t("checklistTitle");
-      document.getElementById("labelMachine").textContent = t("labelMachine");
-      document.getElementById("labelCheckLocation").textContent = t("labelCheckLocation");
-      document.getElementById("labelMachineName").textContent = t("labelMachineName");
-      document.getElementById("labelMachineNote").textContent = t("labelMachineNote");
-      document.getElementById("labelPhoto").textContent = t("labelPhoto");
-      document.getElementById("mailChecklistBtn").textContent = t("mail");
-      document.getElementById("pdfChecklistBtn").textContent = t("pdf");
-      document.getElementById("photoNote").textContent = t("photoNote");
-
-      document.getElementById("incidentTitle").textContent = t("incidentTitle");
-      document.getElementById("labelIncidentLocation").textContent = t("labelIncidentLocation");
-      document.getElementById("labelIncidentName").textContent = t("labelIncidentName");
-      document.getElementById("labelIncidentText").textContent = t("labelIncidentText");
-      document.getElementById("mailIncidentBtn").textContent = t("mail");
-      document.getElementById("pdfIncidentBtn").textContent = t("pdf");
-
-      document.getElementById("aantal").placeholder = t("labelCount");
-      document.getElementById("palletNaam").placeholder = t("labelName");
-      document.getElementById("checkNaam").placeholder = t("labelName");
-      document.getElementById("opmerking").placeholder = t("labelMachineNote");
-      document.getElementById("incidentNaam").placeholder = t("labelName");
-      document.getElementById("incidentText").placeholder = t("labelIncidentText");
-    }
-
-    function showTab(tabId) {
-      document.querySelectorAll(".tab").forEach(tab => tab.classList.remove("active"));
-      document.querySelectorAll("nav button").forEach(btn => btn.classList.remove("active"));
-
-      document.getElementById(tabId).classList.add("active");
-
-      if (tabId === "dashboard") document.getElementById("tabBtnDashboard").classList.add("active");
-      if (tabId === "pallets") document.getElementById("tabBtnPallets").classList.add("active");
-      if (tabId === "checklist") document.getElementById("tabBtnChecklist").classList.add("active");
-      if (tabId === "incident") document.getElementById("tabBtnIncident").classList.add("active");
-    }
-
-    function savePallets() {
-      const location = document.getElementById("locatie").value;
-      const count = Number(document.getElementById("aantal").value);
-      const name = document.getElementById("palletNaam").value.trim();
-      const date = new Date().toLocaleString();
-
-      if (isNaN(count) || count < 0) {
-        alert(t("enterValidCount"));
-        return;
-      }
-
-      palletData.push({ location, count, name, date });
-      localStorage.setItem("awc_pallets", JSON.stringify(palletData));
-
-      document.getElementById("aantal").value = "";
-      document.getElementById("palletNaam").value = "";
-
-      renderAll();
-      alert(t("palletSaved"));
-    }
-
-    function renderPalletList() {
-      const list = document.getElementById("palletList");
-      list.innerHTML = "";
-
-      const sorted = [...palletData].reverse();
-
-      sorted.forEach(item => {
-        const li = document.createElement("li");
-        li.textContent = `${item.date} - ${item.location} - ${item.count}${item.name ? " - " + item.name : ""}`;
-        list.appendChild(li);
-      });
-    }
-
-    function renderStats() {
-      const total = palletData.reduce((sum, item) => sum + Number(item.count), 0);
-      const last = palletData.length ? palletData[palletData.length - 1].count : 0;
-
-      document.getElementById("statTotal").textContent = total;
-      document.getElementById("statLast").textContent = last;
-    }
-
-    function renderComparison() {
-      const output = document.getElementById("compareOutput");
-
-      if (palletData.length < 2) {
-        output.textContent = t("compareEmpty");
-        return;
-      }
-
-      const last = palletData[palletData.length - 1];
-      const previous = palletData[palletData.length - 2];
-      const diff = Number(last.count) - Number(previous.count);
-
-      if (diff > 0) {
-        output.textContent = `${last.location}: ${diff} ${t("comparisonMore")}.`;
-      } else if (diff < 0) {
-        output.textContent = `${last.location}: ${Math.abs(diff)} ${t("comparisonLess")}.`;
-      } else {
-        output.textContent = `${last.location}: ${t("comparisonEqual")}.`;
-      }
-    }
-
-    function renderChart() {
-      const ctx = document.getElementById("palletChart").getContext("2d");
-
-      const labels = palletData.map(item => item.date);
-      const values = palletData.map(item => item.count);
-
-      if (palletChart) {
-        palletChart.destroy();
-      }
-
-      palletChart = new Chart(ctx, {
-        type: "line",
-        data: {
-          labels,
-          datasets: [{
-            label: t("labelCount"),
-            data: values,
-            tension: 0.25,
-            borderWidth: 2,
-            fill: false
-          }]
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: true
-        }
-      });
-    }
-
-    function renderAll() {
-      renderPalletList();
-      renderStats();
-      renderComparison();
-      renderChart();
-    }
-
-    function mailPallets() {
-      let body = `${t("palletPdfTitle")}\n\n`;
-      palletData.forEach(item => {
-        body += `${t("date")}: ${item.date}\n${t("location")}: ${item.location}\n${t("count")}: ${item.count}\n${t("name")}: ${item.name || "-"}\n\n`;
-      });
-
-      window.location.href = `mailto:?subject=${encodeURIComponent(t("palletMailSubject"))}&body=${encodeURIComponent(body)}`;
-    }
-
-    function exportPalletPDF() {
-      const { jsPDF } = window.jspdf;
-      const doc = new jsPDF();
-
-      doc.setFontSize(16);
-      doc.text(t("palletPdfTitle"), 10, 15);
-
-      let y = 30;
-      palletData.forEach((item, index) => {
-        doc.setFontSize(11);
-        doc.text(`${index + 1}. ${t("date")}: ${item.date}`, 10, y); y += 7;
-        doc.text(`${t("location")}: ${item.location}`, 10, y); y += 7;
-        doc.text(`${t("count")}: ${item.count}`, 10, y); y += 7;
-        doc.text(`${t("name")}: ${item.name || "-"}`, 10, y); y += 10;
-
-        if (y > 260) {
-          doc.addPage();
-          y = 20;
-        }
-      });
-
-      doc.save("awc-pallet-overzicht.pdf");
-    }
-
-    function mailChecklist() {
-      const machine = document.getElementById("machineType").value;
-      const location = document.getElementById("checkLocatie").value;
-      const name = document.getElementById("checkNaam").value.trim();
-      const note = document.getElementById("opmerking").value.trim();
-
-      const body =
-`${t("machine")}: ${machine}
-${t("location")}: ${location}
-${t("name")}: ${name || "-"}
-${t("note")}: ${note || "-"}
-
-${t("photoNote")}`;
-
-      window.location.href = `mailto:?subject=${encodeURIComponent(t("checklistMailSubject"))}&body=${encodeURIComponent(body)}`;
-    }
-
-    async function pdfChecklist() {
-      const { jsPDF } = window.jspdf;
-      const doc = new jsPDF();
-
-      const machine = document.getElementById("machineType").value;
-      const location = document.getElementById("checkLocatie").value;
-      const name = document.getElementById("checkNaam").value.trim();
-      const note = document.getElementById("opmerking").value.trim();
-      const file = document.getElementById("foto").files[0];
-
-      doc.setFontSize(16);
-      doc.text(t("checklistPdfTitle"), 10, 15);
-
-      doc.setFontSize(11);
-      doc.text(`${t("machine")}: ${machine}`, 10, 30);
-      doc.text(`${t("location")}: ${location}`, 10, 40);
-      doc.text(`${t("name")}: ${name || "-"}`, 10, 50);
-      doc.text(`${t("note")}: ${note || "-"}`, 10, 60);
-
-      if (file) {
-        const dataUrl = await fileToDataURL(file);
-        doc.addImage(dataUrl, "JPEG", 10, 75, 120, 90);
-      }
-
-      doc.save("awc-machine-checklist.pdf");
-    }
-
-    function mailIncident() {
-      const location = document.getElementById("incidentLocatie").value;
-      const name = document.getElementById("incidentNaam").value.trim();
-      const description = document.getElementById("incidentText").value.trim();
-
-      const body =
-`${t("location")}: ${location}
-${t("name")}: ${name || "-"}
-${t("description")}: ${description || "-"}`;
-
-      window.location.href = `mailto:?subject=${encodeURIComponent(t("incidentMailSubject"))}&body=${encodeURIComponent(body)}`;
-    }
-
-    function pdfIncident() {
-      const { jsPDF } = window.jspdf;
-      const doc = new jsPDF();
-
-      const location = document.getElementById("incidentLocatie").value;
-      const name = document.getElementById("incidentNaam").value.trim();
-      const description = document.getElementById("incidentText").value.trim();
-
-      doc.setFontSize(16);
-      doc.text(t("incidentPdfTitle"), 10, 15);
-
-      doc.setFontSize(11);
-      doc.text(`${t("location")}: ${location}`, 10, 30);
-      doc.text(`${t("name")}: ${name || "-"}`, 10, 40);
-
-      const lines = doc.splitTextToSize(`${t("description")}: ${description || "-"}`, 180);
-      doc.text(lines, 10, 55);
-
-      doc.save("awc-bijna-ongeval.pdf");
-    }
-
-    function fileToDataURL(file) {
-      return new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload = e => resolve(e.target.result);
-        reader.onerror = reject;
-        reader.readAsDataURL(file);
-      });
-    }
-
-    if ("serviceWorker" in navigator) {
-      navigator.serviceWorker.register("sw.js").catch(() => {});
-    }
-
-    applyTranslations();
-    renderAll();
-  </script>
+
+<header>
+<h2>AWC Warehouse App</h2>
+</header>
+
+<nav>
+<button onclick="showTab('dashboard')" class="active">Dashboard</button>
+<button onclick="showTab('pallets')">Pallets</button>
+<button onclick="showTab('checklist')">Checklist</button>
+<button onclick="showTab('incident')">Incident</button>
+</nav>
+
+<main>
+
+<!-- DASHBOARD -->
+<div id="dashboard" class="tab card">
+<h3>Totaal pallets</h3>
+<div id="totaal">0</div>
+
+<h3>Vergelijking</h3>
+<div id="compare"></div>
+
+<canvas id="chart"></canvas>
+</div>
+
+<!-- PALLETS -->
+<div id="pallets" class="tab card" style="display:none;">
+<h3>Pallet telling</h3>
+
+<select id="locatie">
+<option>Conakryweg</option>
+<option>Slego</option>
+</select>
+
+<label>Europallets</label>
+<input type="number" id="euro" value="0">
+
+<label>Blokpallets</label>
+<input type="number" id="blok" value="0">
+
+<label>2 meter pallets</label>
+<input type="number" id="meter2" value="0">
+
+<label>DPB pallets</label>
+<input type="number" id="dpb" value="0">
+
+<input placeholder="Naam" id="naam">
+
+<button onclick="save()">Opslaan</button>
+<button onclick="mail()">Mail</button>
+<button onclick="pdf()">PDF</button>
+
+<h3>Geschiedenis</h3>
+<ul id="lijst"></ul>
+</div>
+
+<!-- CHECKLIST -->
+<div id="checklist" class="tab card" style="display:none;">
+<h3>Machine check</h3>
+
+<select id="machine">
+<option>Reachtruck</option>
+<option>Pompkar</option>
+</select>
+
+<textarea id="checkText" placeholder="Probleem"></textarea>
+<input type="file" id="foto">
+
+<button onclick="mailCheck()">Mail</button>
+<button onclick="pdfCheck()">PDF</button>
+</div>
+
+<!-- INCIDENT -->
+<div id="incident" class="tab card" style="display:none;">
+<h3>Bijna ongeval</h3>
+
+<textarea id="incidentText"></textarea>
+
+<button onclick="mailIncident()">Mail</button>
+<button onclick="pdfIncident()">PDF</button>
+</div>
+
+</main>
+
+<script>
+let data = JSON.parse(localStorage.getItem("data")) || [];
+
+function showTab(tab){
+document.querySelectorAll(".tab").forEach(t=>t.style.display="none");
+document.getElementById(tab).style.display="block";
+}
+
+function save(){
+let euro = +document.getElementById("euro").value;
+let blok = +document.getElementById("blok").value;
+let meter2 = +document.getElementById("meter2").value;
+let dpb = +document.getElementById("dpb").value;
+
+let total = euro+blok+meter2+dpb;
+
+let item = {
+loc:document.getElementById("locatie").value,
+euro,blok,meter2,dpb,total,
+date:new Date().toLocaleString()
+};
+
+data.push(item);
+localStorage.setItem("data",JSON.stringify(data));
+
+render();
+}
+
+function render(){
+let totaal = data.reduce((a,b)=>a+b.total,0);
+document.getElementById("totaal").innerText = totaal;
+
+let lijst="";
+data.slice().reverse().forEach(i=>{
+lijst += `<li>${i.date} - ${i.loc} - ${i.total}</li>`;
+});
+document.getElementById("lijst").innerHTML = lijst;
+
+if(data.length>1){
+let d = data[data.length-1].total - data[data.length-2].total;
+document.getElementById("compare").innerText = "Verschil: "+d;
+}
+
+drawChart();
+}
+
+function drawChart(){
+let ctx = document.getElementById("chart");
+new Chart(ctx,{
+type:'line',
+data:{
+labels:data.map(i=>i.date),
+datasets:[{data:data.map(i=>i.total)}]
+}
+});
+}
+
+function mail(){
+let body = data.map(i=>`${i.loc} ${i.total}`).join("\n");
+location.href="mailto:?body="+body;
+}
+
+function pdf(){
+const { jsPDF } = window.jspdf;
+let doc = new jsPDF();
+let y=10;
+
+data.forEach(i=>{
+doc.text(`${i.loc} ${i.total}`,10,y);
+y+=10;
+});
+
+doc.save("pallets.pdf");
+}
+
+function mailCheck(){
+let txt=document.getElementById("checkText").value;
+location.href="mailto:?body="+txt;
+}
+
+function pdfCheck(){
+const { jsPDF } = window.jspdf;
+let doc=new jsPDF();
+doc.text(document.getElementById("checkText").value,10,10);
+doc.save("check.pdf");
+}
+
+function mailIncident(){
+location.href="mailto:?body="+document.getElementById("incidentText").value;
+}
+
+function pdfIncident(){
+const { jsPDF } = window.jspdf;
+let doc=new jsPDF();
+doc.text(document.getElementById("incidentText").value,10,10);
+doc.save("incident.pdf");
+}
+
+render();
+</script>
+
 </body>
 </html>
