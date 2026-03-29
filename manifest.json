@@ -1,8 +1,0 @@
-{
-  "name": "AWC V20 Enterprise",
-  "short_name": "AWC",
-  "start_url": "/",
-  "display": "standalone",
-  "background_color": "#111111",
-  "theme_color": "#ff7a00"
-}
